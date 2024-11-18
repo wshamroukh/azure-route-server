@@ -39,7 +39,7 @@ onprem1_vm_subnet_address='172.21.1.0/24'
 onprem1_gw_subnet_name='gw'
 onprem1_gw_subnet_address='172.21.0.0/24'
 onprem1_gw_vm_name='onprem1-gw'
-onprem1_gw_asn=65016
+onprem1_gw_asn=65021
 onprem1_vm_name='onprem1'
 
 onprem2_vnet_name='onprem2'
