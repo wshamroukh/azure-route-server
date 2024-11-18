@@ -43,11 +43,11 @@ onprem1_gw_asn=65016
 onprem1_vm_name='onprem1'
 
 onprem2_vnet_name='onprem2'
-onprem2_vnet_address='172.17.0.0/16'
+onprem2_vnet_address='172.22.0.0/16'
 onprem2_vm_subnet_name='vms'
-onprem2_vm_subnet_address='172.17.1.0/24'
+onprem2_vm_subnet_address='172.22.1.0/24'
 onprem2_gw_subnet_name='gw'
-onprem2_gw_subnet_address='172.17.0.0/24'
+onprem2_gw_subnet_address='172.22.0.0/24'
 onprem2_gw_vm_name='onprem2-gw'
 onprem2_gw_asn=65017
 onprem2_vm_name='onprem2'
@@ -582,8 +582,8 @@ EOF
 
 
 # ipsec-vti.sh
-onprem2_gw_vti_address1=172.17.0.11
-onprem2_gw_vti_address2=172.17.0.12
+onprem2_gw_vti_address1=172.22.0.11
+onprem2_gw_vti_address2=172.22.0.12
 ipsec_vti_file=~/ipsec-vti.sh
 tee -a $ipsec_vti_file > /dev/null <<'EOT'
 #!/bin/bash
