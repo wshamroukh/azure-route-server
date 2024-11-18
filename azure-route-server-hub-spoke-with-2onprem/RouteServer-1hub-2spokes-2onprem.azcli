@@ -49,7 +49,7 @@ onprem2_vm_subnet_address='172.22.1.0/24'
 onprem2_gw_subnet_name='gw'
 onprem2_gw_subnet_address='172.22.0.0/24'
 onprem2_gw_vm_name='onprem2-gw'
-onprem2_gw_asn=65017
+onprem2_gw_asn=65022
 onprem2_vm_name='onprem2'
 
 admin_username=$(whoami)
