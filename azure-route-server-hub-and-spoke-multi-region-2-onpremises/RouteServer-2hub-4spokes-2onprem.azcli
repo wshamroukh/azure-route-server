@@ -86,8 +86,8 @@ psk='secret123'
 vm_size=Standard_B2ats_v2
 vm_image=$(az vm image list -l $location1 -p Canonical -s 22_04-lts --all --query "[?offer=='0001-com-ubuntu-server-jammy'].urn" -o tsv | sort -u | tail -n 1) && echo $vm_image
 
-default_address1='0.0.0.0/1'
-default_address2='128.0.0.0/1'
+advertised_address1='1.1.1.1/32'
+advertised_address2='2.2.2.2/32'
 network_address_summary='10.0.0.0/8'
 
 cloudinit_file=~/cloudinit.txt
@@ -666,8 +666,7 @@ log syslog informational
 no ipv6 forwarding
 service integrated-vtysh-config
 !
-ip route $default_address1 $onprem1_gw_ext_gw_ip
-ip route $default_address2 $onprem1_gw_ext_gw_ip
+ip route $advertised_address1 $onprem1_gw_ext_gw_ip
 ip route $onprem1_vnet_address $onprem1_gw_ext_gw_ip
 ip route $hub1_gw_bgp_ip1/32 $onprem1_gw_ext_gw_ip
 ip route $hub1_gw_bgp_ip2/32 $onprem1_gw_ext_gw_ip
@@ -683,6 +682,7 @@ router bgp $onprem1_gw_asn
  neighbor $hub1_gw_bgp_ip2 ebgp-multihop 2
  !
  address-family ipv4 unicast
+  network $advertised_address1
   network $onprem1_vnet_address
   neighbor $hub1_gw_bgp_ip1 soft-reconfiguration inbound
   neighbor $hub1_gw_bgp_ip2 soft-reconfiguration inbound
@@ -835,8 +835,7 @@ log syslog informational
 no ipv6 forwarding
 service integrated-vtysh-config
 !
-ip route $default_address1 $onprem2_gw_ext_gw_ip
-ip route $default_address2 $onprem2_gw_ext_gw_ip
+ip route $advertised_address2 $onprem2_gw_ext_gw_ip
 ip route $onprem2_vnet_address $onprem2_gw_ext_gw_ip
 ip route $hub2_gw_bgp_ip1/32 $onprem2_gw_ext_gw_ip
 ip route $hub2_gw_bgp_ip2/32 $onprem2_gw_ext_gw_ip
@@ -852,6 +851,7 @@ router bgp $onprem2_gw_asn
  neighbor $hub2_gw_bgp_ip2 ebgp-multihop 2
  !
  address-family ipv4 unicast
+  network $advertised_address2
   network $onprem2_vnet_address
   neighbor $hub2_gw_bgp_ip1 soft-reconfiguration inbound
   neighbor $hub2_gw_bgp_ip2 soft-reconfiguration inbound
@@ -969,6 +969,7 @@ script_run_time=$(expr `date +%s` - $script_start_time)
 ((minutes=${script_run_time}/60))
 ((seconds=${script_run_time}%60))
 echo -e "\e[1;34mTotal script runtime is (minutes:seconds): $minutes:$seconds\e[0m"
+
 ##########
 #Clean up
 ##########

@@ -45,8 +45,8 @@ admin_username=$(whoami)
 psk='secret123'
 vm_size=Standard_B2ats_v2
 vm_image=$(az vm image list -l $location -p Canonical -s 22_04-lts --all --query "[?offer=='0001-com-ubuntu-server-jammy'].urn" -o tsv | sort -u | tail -n 1) && echo $vm_image
-default_address1='0.0.0.0/1'
-default_address2='128.0.0.0/1'
+advertised_address1='1.1.1.1/32'
+advertised_address2='2.2.2.2/32'
 
 # cloudinit
 cloudinit_file=~/cloudinit.txt
@@ -192,8 +192,8 @@ log syslog informational
 no ipv6 forwarding
 service integrated-vtysh-config
 !
-ip route $default_address1 $nva_gw_ip
-ip route $default_address2 $nva_gw_ip
+ip route $advertised_address1 $nva_gw_ip
+ip route $advertised_address2 $nva_gw_ip
 ip route $onprem_vnet_address $nva_gw_ip
 ip route $rs_ip1/32 $nva_gw_ip
 ip route $rs_ip2/32 $nva_gw_ip
@@ -210,8 +210,8 @@ router bgp $hub_nva_asn
  neighbor $rs_ip2 ebgp-multihop 255
  !
  address-family ipv4 unicast
-  network $default_address1
-  network $default_address2
+  network $advertised_address1
+  network $advertised_address2
   network 2.2.2.2/32
   neighbor $rs_ip1 soft-reconfiguration inbound
   neighbor $rs_ip2 soft-reconfiguration inbound
@@ -426,8 +426,6 @@ log syslog informational
 no ipv6 forwarding
 service integrated-vtysh-config
 !
-ip route $default_address1 $onprem_gw_gw_ip
-ip route $default_address2 $onprem_gw_gw_ip
 ip route $onprem_vnet_address $onprem_gw_gw_ip
 !
 router bgp $onprem_gw_asn
@@ -510,10 +508,7 @@ az network nic show-effective-route-table -g $rg -n $spoke1_vm_name -o table
 echo -e "\e[1;36mListing effective routes on $spoke2_vm_name NIC ...\e[0m"
 az network nic show-effective-route-table -g $rg -n $spoke2_vm_name -o table
 
-
-
 ##########
 #Clean up
 ##########
-# az network routeserver peering delete -g $rg -n $hub_nva_name-peering --routeserver $hub_rs_name --yes --no-wait
 # az group delete -n $rg -y --no-wait 
