@@ -88,6 +88,8 @@ vm_image=$(az vm image list -l $location1 -p Canonical -s 22_04-lts --all --quer
 
 advertised_address1='1.1.1.1/32'
 advertised_address2='2.2.2.2/32'
+advertised_address3='3.3.3.3/32'
+advertised_address4='4.4.4.4/32'
 network_address_summary='10.0.0.0/8'
 
 cloudinit_file=~/cloudinit.txt
@@ -217,7 +219,7 @@ az network routeserver update -n $hub1_rs_name -g $rg --allow-b2b-traffic true -
 echo -e "\e[1;36mSet Routing Preference to VpnGateway on $hub1_rs_name Azure Route Server...\e[0m"
 az network routeserver update -n $hub1_rs_name -g $rg --hub-routing-preference VpnGateway -o none
 # hub1 route server details
-echo -e "\e[1;36mGetting $hub1_rs_name Route Sever details...\e[0m"
+echo -e "\e[1;36mGetting $hub1_rs_name Route Server details...\e[0m"
 hub1_rs_ip1=$(az network routeserver show -g $rg -n $hub1_rs_name --query virtualRouterIps[0] -o tsv) && echo $hub1_rs_name: $hub1_rs_ip1
 hub1_rs_ip2=$(az network routeserver show -g $rg -n $hub1_rs_name --query virtualRouterIps[1] -o tsv) && echo $hub1_rs_name: $hub1_rs_ip2
 hub1_rs_asn=$(az network routeserver show -g $rg -n $hub1_rs_name --query virtualRouterAsn -o tsv) && echo $hub1_rs_name: $hub1_rs_asn
@@ -237,7 +239,7 @@ az network routeserver update -n $hub2_rs_name -g $rg --allow-b2b-traffic true -
 echo -e "\e[1;36mSet Routing Preference to VpnGateway on $hub2_rs_name Azure Route Server...\e[0m"
 az network routeserver update -n $hub2_rs_name -g $rg --hub-routing-preference VpnGateway -o none
 # hub2 route server details
-echo -e "\e[1;36mGetting $hub2_rs_name Route Sever details...\e[0m"
+echo -e "\e[1;36mGetting $hub2_rs_name Route Server details...\e[0m"
 hub2_rs_ip1=$(az network routeserver show -g $rg -n $hub2_rs_name --query virtualRouterIps[0] -o tsv) && echo $hub2_rs_name: $hub2_rs_ip1
 hub2_rs_ip2=$(az network routeserver show -g $rg -n $hub2_rs_name --query virtualRouterIps[1] -o tsv) && echo $hub2_rs_name: $hub2_rs_ip2
 hub2_rs_asn=$(az network routeserver show -g $rg -n $hub2_rs_name --query virtualRouterAsn -o tsv) && echo $hub2_rs_name: $hub2_rs_asn
@@ -302,6 +304,7 @@ ip route $hub1_rs_ip2/32 $nva1_gw_ip
 ip route $hub1_rs_ip1/32 $nva1_gw_ip
 ip route $hub2_nva_private_ip/32 $nva1_gw_ip
 ip route $network_address_summary $nva1_gw_ip
+ip route $advertised_address3 $nva1_gw_ip
 !
 router bgp $hub1_nva_asn
  bgp router-id $hub1_nva_private_ip
@@ -318,6 +321,7 @@ router bgp $hub1_nva_asn
  !
  address-family ipv4 unicast
   network $network_address_summary
+  network $advertised_address3
   neighbor $hub1_rs_ip2 soft-reconfiguration inbound
   neighbor $hub1_rs_ip1 soft-reconfiguration inbound
   neighbor $hub2_nva_private_ip soft-reconfiguration inbound
@@ -333,7 +337,9 @@ scp -o StrictHostKeyChecking=no $frr_conf_file $hub1_nva_pubip:/home/$admin_user
 scp -o StrictHostKeyChecking=no /home/$admin_username/.ssh/* $hub1_nva_pubip:/home/$admin_username/.ssh/
 # enable NAT, apply frr config files
 ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub1_nva_pubip "sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE"
-ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub1_nva_pubip "sudo mv /home/$admin_username/frr.conf /etc/frr/frr.conf && sudo service frr restart"
+ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub1_nva_pubip "sudo mv /home/$admin_username/frr.conf /etc/frr/"
+ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub1_nva_pubip "sudo service frr restart"
+ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub1_nva_pubip "sudo service frr status"
 # clean up config files
 rm $frr_conf_file
 
@@ -357,6 +363,7 @@ ip route $hub1_nva_private_ip/32 $nva2_gw_ip
 ip route $hub2_rs_ip2/32 $nva2_gw_ip
 ip route $hub2_rs_ip1/32 $nva2_gw_ip
 ip route $network_address_summary $nva2_gw_ip
+ip route $advertised_address4 $nva2_gw_ip
 !
 router bgp $hub2_nva_asn
  bgp router-id $hub2_nva_private_ip
@@ -373,11 +380,11 @@ router bgp $hub2_nva_asn
  !
  address-family ipv4 unicast
   network $network_address_summary
+  network $advertised_address4
   neighbor $hub1_nva_private_ip soft-reconfiguration inbound
   neighbor $hub1_nva_private_ip remove-private-AS
   neighbor $hub2_rs_ip2 soft-reconfiguration inbound
   neighbor $hub2_rs_ip1 soft-reconfiguration inbound
-
  exit-address-family
 exit
 !
@@ -389,7 +396,9 @@ scp -o StrictHostKeyChecking=no $frr_conf_file $hub2_nva_pubip:/home/$admin_user
 scp -o StrictHostKeyChecking=no /home/$admin_username/.ssh/* $hub2_nva_pubip:/home/$admin_username/.ssh/
 # enable NAT, apply frr config files
 ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub2_nva_pubip "sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE"
-ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub2_nva_pubip "sudo mv /home/$admin_username/frr.conf /etc/frr/frr.conf && sudo service frr restart"
+ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub2_nva_pubip "sudo mv /home/$admin_username/frr.conf /etc/frr/"
+ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub2_nva_pubip "sudo service frr restart"
+ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub2_nva_pubip "sudo service frr status"
 # clean up config files
 rm $frr_conf_file
 
@@ -412,7 +421,7 @@ az vm create -n $onprem1_gw_name -g $rg -l $location1 --image $vm_image --nics $
 # onprem1 gw details
 onprem1_gw_pubip=$(az network public-ip show -g $rg -n $onprem1_gw_name-pubip --query ipAddress -o tsv) && echo $onprem1_gw_name: $onprem1_gw_pubip
 onprem1_gw_private_ip=$(az network nic show -g $rg -n $onprem1_gw_name-ext-nic --query ipConfigurations[].privateIPAddress -o tsv)  && echo $onprem1_gw_name external NIC IP: $onprem1_gw_private_ip
-onprem1_gw_gw_ip=$(first_ip $onprem1_gw_subnet_address) && echo $onprem1_gw_name external NIC default gateway IP: $onprem1_gw_gw_ip
+onprem1_gw_ip=$(first_ip $onprem1_gw_subnet_address) && echo $onprem1_gw_name external NIC default gateway IP: $onprem1_gw_ip
 
 # onprem2 gw
 echo -e "\e[1;36mDeploying $onprem2_gw_name VM...\e[0m"
@@ -422,7 +431,7 @@ az vm create -n $onprem2_gw_name -g $rg -l $location2 --image $vm_image --nics $
 # onprem2 gw details:
 onprem2_gw_pubip=$(az network public-ip show -g $rg -n $onprem2_gw_name --query ipAddress -o tsv) && echo $onprem2_gw_name: $onprem2_gw_pubip
 onprem2_gw_private_ip=$(az network nic show -g $rg -n $onprem2_gw_name --query ipConfigurations[].privateIPAddress -o tsv) && echo $onprem2_gw_name external NIC IP: $onprem2_gw_private_ip
-onprem2_gw_gw_ip=$(first_ip $onprem2_gw_subnet_address) && echo $onprem2_gw_name external NIC default gateway IP: $onprem2_gw_gw_ip
+onprem2_gw_ip=$(first_ip $onprem2_gw_subnet_address) && echo $onprem2_gw_name external NIC default gateway IP: $onprem2_gw_ip
 
 # hub1 vm
 echo -e "\e[1;36mDeploying $hub1_vm_name VM...\e[0m"
@@ -566,7 +575,7 @@ conn %default
          installpolicy=yes
          compress=no
          mobike=no
-conn Azure1
+conn $hub1_gw_name-0
          # OnPrem Gateway Private IP Address :
          left=$onprem1_gw_private_ip
          # OnPrem Gateway Public IP Address :
@@ -577,7 +586,7 @@ conn Azure1
          auto=start
          # unique number per IPSEC Tunnel eg. 100, 101 etc
          mark=101
-conn Azure2
+conn $hub1_gw_name-1
          # OnPrem Gateway Private IP Address :
          left=$onprem1_gw_private_ip
          # OnPrem Gateway Public IP Address :
@@ -607,12 +616,12 @@ IPTABLES=$(which iptables)
 PLUTO_MARK_OUT_ARR=(${PLUTO_MARK_OUT//// })
 PLUTO_MARK_IN_ARR=(${PLUTO_MARK_IN//// })
 case "$PLUTO_CONNECTION" in
-  Azure1)
+  $hub1_gw_name-0)
     VTI_INTERFACE=vti0
     VTI_LOCALADDR=$onprem1_gw_vti_address1/32
     VTI_REMOTEADDR=$hub1_gw_bgp_ip1/32
     ;;
-  Azure2)
+  $hub1_gw_name-1)
     VTI_INTERFACE=vti1
     VTI_LOCALADDR=$onprem1_gw_vti_address2/32
     VTI_REMOTEADDR=$hub1_gw_bgp_ip2/32
@@ -642,6 +651,7 @@ sysctl -w net.ipv4.conf.eth0.disable_xfrm=1
 sysctl -w net.ipv4.conf.eth0.disable_policy=1
 EOT
 
+sed -i "/\$hub1_gw_name/ s//$hub1_gw_name/" $ipsec_vti_file
 sed -i "/\$onprem1_gw_vti_address1/ s//$onprem1_gw_vti_address1/" $ipsec_vti_file
 sed -i "/\$onprem1_gw_vti_address2/ s//$onprem1_gw_vti_address2/" $ipsec_vti_file
 sed -i "/\$hub1_gw_bgp_ip1/ s//$hub1_gw_bgp_ip1/" $ipsec_vti_file
@@ -658,10 +668,10 @@ log syslog informational
 no ipv6 forwarding
 service integrated-vtysh-config
 !
-ip route $advertised_address1 $onprem1_gw_gw_ip
-ip route $onprem1_vnet_address $onprem1_gw_gw_ip
-ip route $hub1_gw_bgp_ip1/32 $onprem1_gw_gw_ip
-ip route $hub1_gw_bgp_ip2/32 $onprem1_gw_gw_ip
+ip route $advertised_address1 $onprem1_gw_ip
+ip route $onprem1_vnet_address $onprem1_gw_ip
+ip route $hub1_gw_bgp_ip1/32 $onprem1_gw_ip
+ip route $hub1_gw_bgp_ip2/32 $onprem1_gw_ip
 !
 router bgp $onprem1_gw_asn
  bgp router-id $onprem1_gw_private_ip
@@ -740,7 +750,7 @@ conn %default
          installpolicy=yes
          compress=no
          mobike=no
-conn Azure1
+conn $hub2_gw_name-0
          # OnPrem Gateway Private IP Address :
          left=$onprem2_gw_private_ip
          # OnPrem Gateway Public IP Address :
@@ -751,7 +761,7 @@ conn Azure1
          auto=start
          # unique number per IPSEC Tunnel eg. 100, 101 etc
          mark=101
-conn Azure2
+conn $hub2_gw_name-1
          # OnPrem Gateway Private IP Address :
          left=$onprem2_gw_private_ip
          # OnPrem Gateway Public IP Address :
@@ -781,12 +791,12 @@ IPTABLES=$(which iptables)
 PLUTO_MARK_OUT_ARR=(${PLUTO_MARK_OUT//// })
 PLUTO_MARK_IN_ARR=(${PLUTO_MARK_IN//// })
 case "$PLUTO_CONNECTION" in
-  Azure1)
+  $hub2_gw_name-0)
     VTI_INTERFACE=vti0
     VTI_LOCALADDR=$onprem2_gw_vti_address1/32
     VTI_REMOTEADDR=$hub2_gw_bgp_ip1/32
     ;;
-  Azure2)
+  $hub2_gw_name-1)
     VTI_INTERFACE=vti1
     VTI_LOCALADDR=$onprem2_gw_vti_address2/32
     VTI_REMOTEADDR=$hub2_gw_bgp_ip2/32
@@ -816,6 +826,7 @@ sysctl -w net.ipv4.conf.eth0.disable_xfrm=1
 sysctl -w net.ipv4.conf.eth0.disable_policy=1
 EOT
 
+sed -i "/\$hub2_gw_name/ s//$hub2_gw_name/" $ipsec_vti_file
 sed -i "/\$onprem2_gw_vti_address1/ s//$onprem2_gw_vti_address1/" $ipsec_vti_file
 sed -i "/\$onprem2_gw_vti_address2/ s//$onprem2_gw_vti_address2/" $ipsec_vti_file
 sed -i "/\$hub2_gw_bgp_ip1/ s//$hub2_gw_bgp_ip1/" $ipsec_vti_file
@@ -832,10 +843,10 @@ log syslog informational
 no ipv6 forwarding
 service integrated-vtysh-config
 !
-ip route $advertised_address2 $onprem2_gw_gw_ip
-ip route $onprem2_vnet_address $onprem2_gw_gw_ip
-ip route $hub2_gw_bgp_ip1/32 $onprem2_gw_gw_ip
-ip route $hub2_gw_bgp_ip2/32 $onprem2_gw_gw_ip
+ip route $advertised_address2 $onprem2_gw_ip
+ip route $onprem2_vnet_address $onprem2_gw_ip
+ip route $hub2_gw_bgp_ip1/32 $onprem2_gw_ip
+ip route $hub2_gw_bgp_ip2/32 $onprem2_gw_ip
 !
 router bgp $onprem2_gw_asn
  bgp router-id $onprem2_gw_private_ip
