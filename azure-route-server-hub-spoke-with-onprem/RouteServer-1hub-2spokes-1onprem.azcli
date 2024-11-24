@@ -356,7 +356,7 @@ EOF
 onprem_gw_vti_address1=172.21.0.11
 onprem_gw_vti_address2=172.21.0.12
 ipsec_vti_file=~/ipsec-vti.sh
-tee -a $ipsec_vti_file > /dev/null <<'EOT'
+tee $ipsec_vti_file > /dev/null <<'EOT'
 #!/bin/bash
 
 #
