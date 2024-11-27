@@ -189,7 +189,7 @@ az network vnet peering create -n $spoke2_vnet_name-to-$hub_vnet_name -g $rg --v
 
 # Create BGP Peering between RouteServer and NVA
 echo -e "\e[1;36mCreating a peering connection between $hub_rs_name Azure Route Server and $hub_nva_name VM...\e[0m"
-az network routeserver peering create -g $rg -n $hub_nva_name-peering --routeserver $hub_rs_name  --peer-ip $hub_nva_private_ip --peer-asn $hub_nva_asn --no-wait -o none
+az network routeserver peering create -g $rg -n $hub_nva_name-peering --routeserver $hub_rs_name --peer-ip $hub_nva_private_ip --peer-asn $hub_nva_asn --no-wait -o none
 
 #####################
 # NVA Configuration #

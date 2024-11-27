@@ -226,7 +226,7 @@ hub1_rs_asn=$(az network routeserver show -g $rg -n $hub1_rs_name --query virtua
 
 # Create BGP Peering between hub1 RouteServer and hub1 NVA
 echo -e "\e[1;36mCreating a BGP peering connection between $hub1_rs_name Azure Route Server and $hub1_nva_name VM...\e[0m"
-az network routeserver peering create -g $rg -n $hub1_nva_name-peering --routeserver $hub1_rs_name  --peer-ip $hub1_nva_private_ip --peer-asn $hub1_nva_asn --no-wait -o none
+az network routeserver peering create -g $rg -n $hub1_nva_name-peering --routeserver $hub1_rs_name --peer-ip $hub1_nva_private_ip --peer-asn $hub1_nva_asn --no-wait -o none
 
 # hub2 route server
 echo -e "\e[1;36mDeploying $hub2_rs_name Azure Route Server Resource in $hub2_vnet_name...\e[0m"
@@ -246,7 +246,7 @@ hub2_rs_asn=$(az network routeserver show -g $rg -n $hub2_rs_name --query virtua
 
 # Create BGP Peering between hub2 RouteServer and hub2 NVA
 echo -e "\e[1;36mCreating a BGP peering connection between $hub2_rs_name Azure Route Server and $hub2_nva_name VM...\e[0m"
-az network routeserver peering create -g $rg -n $hub2_nva_name-peering --routeserver $hub2_rs_name  --peer-ip $hub2_nva_private_ip --peer-asn $hub2_nva_asn --no-wait -o none
+az network routeserver peering create -g $rg -n $hub2_nva_name-peering --routeserver $hub2_rs_name --peer-ip $hub2_nva_private_ip --peer-asn $hub2_nva_asn --no-wait -o none
 
 # spoke11 vnet
 echo -e "\e[1;36mCreating $spoke11_vnet_name VNet...\e[0m"
