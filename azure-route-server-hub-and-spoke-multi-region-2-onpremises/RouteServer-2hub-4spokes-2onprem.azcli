@@ -269,7 +269,7 @@ echo -e "\e[1;36mCreating $onprem2_vnet_name VNet...\e[0m"
 az network vnet create -g $rg -n $onprem2_vnet_name -l $location2 --address-prefixes $onprem2_vnet_address --subnet-name $onprem2_vm_subnet_name --subnet-prefixes $onprem2_vm_subnet_address -o none
 az network vnet subnet create -g $rg -n $onprem2_gw_subnet_name --address-prefixes $onprem2_gw_subnet_address --vnet-name $onprem2_vnet_name -o none
 
-# hub1 vnet peering
+# hub1 vnet peering with spoke11 and spoke12
 echo -e "\e[1;36mEstablishing VNet Peering between $hub1_vnet_name and $spoke11_vnet_name VNets...\e[0m"
 az network vnet peering create -n $hub1_vnet_name-to-$spoke11_vnet_name -g $rg --vnet-name $hub1_vnet_name --remote-vnet $spoke11_vnet_name --allow-vnet-access --allow-forwarded-traffic --allow-gateway-transit -o none
 az network vnet peering create -n $spoke11_vnet_name-to-$hub1_vnet_name -g $rg --vnet-name $spoke11_vnet_name --remote-vnet $hub1_vnet_name --allow-vnet-access --allow-forwarded-traffic --use-remote-gateways -o none
@@ -277,7 +277,7 @@ echo -e "\e[1;36mEstablishing VNet Peering between $hub1_vnet_name and $spoke12_
 az network vnet peering create -n $hub1_vnet_name-to-$spoke12_vnet_name -g $rg --vnet-name $hub1_vnet_name --remote-vnet $spoke12_vnet_name --allow-vnet-access --allow-forwarded-traffic --allow-gateway-transit -o none
 az network vnet peering create -n $spoke12_vnet_name-to-$hub1_vnet_name -g $rg --vnet-name $spoke12_vnet_name --remote-vnet $hub1_vnet_name --allow-vnet-access --allow-forwarded-traffic --use-remote-gateways -o none
 
-# hub2 vnet peering
+# hub2 vnet peering with spoke21 and spoke22
 echo -e "\e[1;36mEstablishing VNet Peering between $hub2_vnet_name and $spoke21_vnet_name VNets...\e[0m"
 az network vnet peering create -n $hub2_vnet_name-to-$spoke21_vnet_name -g $rg --vnet-name $hub2_vnet_name --remote-vnet $spoke21_vnet_name --allow-vnet-access --allow-forwarded-traffic --allow-gateway-transit -o none
 az network vnet peering create -n $spoke21_vnet_name-to-$hub2_vnet_name -g $rg --vnet-name $spoke21_vnet_name --remote-vnet $hub2_vnet_name --allow-vnet-access --allow-forwarded-traffic --use-remote-gateways -o none
