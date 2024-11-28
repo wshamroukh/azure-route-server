@@ -255,7 +255,7 @@ az network nic create -n "$onprem1_gw_name" --vnet-name $onprem1_vnet_name -g $r
 az vm create -n $onprem1_gw_name -g $rg --image $vm_image --nics "$onprem1_gw_name" --os-disk-name "$onprem1_gw_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --custom-data $cloudinit_file  --no-wait
 
 # onprem1 gw details:
-onprem1_gw_pubip=$(az network public-ip show -g $rg -n $onprem1_gw_name-pubip --query ipAddress -o tsv) && echo $onprem1_gw_name: $onprem1_gw_pubip
+onprem1_gw_pubip=$(az network public-ip show -g $rg -n $onprem1_gw_name --query ipAddress -o tsv) && echo $onprem1_gw_name: $onprem1_gw_pubip
 onprem1_gw_private_ip=$(az network nic show -g $rg -n $onprem1_gw_name --query ipConfigurations[].privateIPAddress -o tsv) && echo $onprem1_gw_name NIC IP: $onprem1_gw_private_ip
 onprem1_gw_ip=$(first_ip $onprem1_gw_subnet_address) && echo $onprem1_gw_name NIC default gateway IP: $onprem1_gw_ip
 
