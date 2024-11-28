@@ -529,16 +529,16 @@ wait_until_finished $hub2_gw_id
 echo -e "\e[1;36mGetting $hub1_gw_name VPN Gateway details...\e[0m"
 hub1_gw_pubip1=$(az network vnet-gateway show -n $hub1_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[0].tunnelIpAddresses[0]' -o tsv) && echo $hub1_gw_name: $hub1_gw_pubip1
 hub1_gw_pubip2=$(az network vnet-gateway show -n $hub1_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[1].tunnelIpAddresses[0]' -o tsv) && echo $hub1_gw_name: $hub1_gw_pubip2
-hub1_gw_bgp_ip1=$(az network vnet-gateway show -n $hub1_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[0].defaultBgpIpAddresses[0]' -o tsv) && echo $hub1_gw_name: $hub1_gw_bgp_ip1
-hub1_gw_bgp_ip2=$(az network vnet-gateway show -n $hub1_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[1].defaultBgpIpAddresses[0]' -o tsv) && echo $hub1_gw_name: $hub1_gw_bgp_ip2
+hub1_gw_bgp_ip0=$(az network vnet-gateway show -n $hub1_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[0].defaultBgpIpAddresses[0]' -o tsv) && echo $hub1_gw_name: $hub1_gw_bgp_ip0
+hub1_gw_bgp_ip1=$(az network vnet-gateway show -n $hub1_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[1].defaultBgpIpAddresses[0]' -o tsv) && echo $hub1_gw_name: $hub1_gw_bgp_ip1
 hub1_gw_asn=$(az network vnet-gateway show -n $hub1_gw_name -g $rg --query bgpSettings.asn -o tsv) && echo $hub1_gw_name: $hub1_gw_asn
 
 # Getting hub2 VPN GW details
 echo -e "\e[1;36mGetting $hub2_gw_name VPN Gateway details...\e[0m"
 hub2_gw_pubip1=$(az network vnet-gateway show -n $hub2_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[0].tunnelIpAddresses[0]' -o tsv) && echo $hub2_gw_name: $hub2_gw_pubip1
 hub2_gw_pubip2=$(az network vnet-gateway show -n $hub2_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[1].tunnelIpAddresses[0]' -o tsv) && echo $hub2_gw_name: $hub2_gw_pubip2
-hub2_gw_bgp_ip1=$(az network vnet-gateway show -n $hub2_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[0].defaultBgpIpAddresses[0]' -o tsv) && echo $hub2_gw_name: $hub2_gw_bgp_ip1
-hub2_gw_bgp_ip2=$(az network vnet-gateway show -n $hub2_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[1].defaultBgpIpAddresses[0]' -o tsv) && echo $hub2_gw_name: $hub2_gw_bgp_ip2
+hub2_gw_bgp_ip0=$(az network vnet-gateway show -n $hub2_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[0].defaultBgpIpAddresses[0]' -o tsv) && echo $hub2_gw_name: $hub2_gw_bgp_ip0
+hub2_gw_bgp_ip1=$(az network vnet-gateway show -n $hub2_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[1].defaultBgpIpAddresses[0]' -o tsv) && echo $hub2_gw_name: $hub2_gw_bgp_ip1
 hub2_gw_asn=$(az network vnet-gateway show -n $hub2_gw_name -g $rg --query bgpSettings.asn -o tsv) && echo $hub2_gw_name: $hub2_gw_asn
 
 # creating VPN connection between hub1 vpn gw and onprem1 gw
@@ -633,12 +633,12 @@ case "$PLUTO_CONNECTION" in
   $hub1_gw_name-0)
     VTI_INTERFACE=vti0
     VTI_LOCALADDR=$onprem1_gw_vti_address0/32
-    VTI_REMOTEADDR=$hub1_gw_bgp_ip1/32
+    VTI_REMOTEADDR=$hub1_gw_bgp_ip0/32
     ;;
   $hub1_gw_name-1)
     VTI_INTERFACE=vti1
     VTI_LOCALADDR=$onprem1_gw_vti_address1/32
-    VTI_REMOTEADDR=$hub1_gw_bgp_ip2/32
+    VTI_REMOTEADDR=$hub1_gw_bgp_ip1/32
     ;;
 esac
 case "${PLUTO_VERB}" in
@@ -668,8 +668,8 @@ EOT
 sed -i "/\$hub1_gw_name/ s//$hub1_gw_name/" $ipsec_vti_file
 sed -i "/\$onprem1_gw_vti_address0/ s//$onprem1_gw_vti_address0/" $ipsec_vti_file
 sed -i "/\$onprem1_gw_vti_address1/ s//$onprem1_gw_vti_address1/" $ipsec_vti_file
+sed -i "/\$hub1_gw_bgp_ip0/ s//$hub1_gw_bgp_ip0/" $ipsec_vti_file
 sed -i "/\$hub1_gw_bgp_ip1/ s//$hub1_gw_bgp_ip1/" $ipsec_vti_file
-sed -i "/\$hub1_gw_bgp_ip2/ s//$hub1_gw_bgp_ip2/" $ipsec_vti_file
 
 
 # frr.conf
@@ -684,24 +684,24 @@ service integrated-vtysh-config
 !
 ip route $advertised_address1 $onprem1_gw_ip
 ip route $onprem1_vnet_address $onprem1_gw_ip
+ip route $hub1_gw_bgp_ip0/32 $onprem1_gw_ip
 ip route $hub1_gw_bgp_ip1/32 $onprem1_gw_ip
-ip route $hub1_gw_bgp_ip2/32 $onprem1_gw_ip
 !
 router bgp $onprem1_gw_asn
  bgp router-id $onprem1_gw_private_ip
  no bgp ebgp-requires-policy
+ neighbor $hub1_gw_bgp_ip0 remote-as $hub1_gw_asn
+ neighbor $hub1_gw_bgp_ip0 description $hub1_gw_name-0
+ neighbor $hub1_gw_bgp_ip0 ebgp-multihop 2
  neighbor $hub1_gw_bgp_ip1 remote-as $hub1_gw_asn
- neighbor $hub1_gw_bgp_ip1 description $hub1_gw_name-0
+ neighbor $hub1_gw_bgp_ip1 description $hub1_gw_name-1
  neighbor $hub1_gw_bgp_ip1 ebgp-multihop 2
- neighbor $hub1_gw_bgp_ip2 remote-as $hub1_gw_asn
- neighbor $hub1_gw_bgp_ip2 description $hub1_gw_name-1
- neighbor $hub1_gw_bgp_ip2 ebgp-multihop 2
  !
  address-family ipv4 unicast
   network $advertised_address1
   network $onprem1_vnet_address
+  neighbor $hub1_gw_bgp_ip0 soft-reconfiguration inbound
   neighbor $hub1_gw_bgp_ip1 soft-reconfiguration inbound
-  neighbor $hub1_gw_bgp_ip2 soft-reconfiguration inbound
  exit-address-family
 exit
 !
@@ -809,12 +809,12 @@ case "$PLUTO_CONNECTION" in
   $hub2_gw_name-0)
     VTI_INTERFACE=vti0
     VTI_LOCALADDR=$onprem2_gw_vti_address0/32
-    VTI_REMOTEADDR=$hub2_gw_bgp_ip1/32
+    VTI_REMOTEADDR=$hub2_gw_bgp_ip0/32
     ;;
   $hub2_gw_name-1)
     VTI_INTERFACE=vti1
     VTI_LOCALADDR=$onprem2_gw_vti_address1/32
-    VTI_REMOTEADDR=$hub2_gw_bgp_ip2/32
+    VTI_REMOTEADDR=$hub2_gw_bgp_ip1/32
     ;;
 esac
 case "${PLUTO_VERB}" in
@@ -844,8 +844,8 @@ EOT
 sed -i "/\$hub2_gw_name/ s//$hub2_gw_name/" $ipsec_vti_file
 sed -i "/\$onprem2_gw_vti_address0/ s//$onprem2_gw_vti_address0/" $ipsec_vti_file
 sed -i "/\$onprem2_gw_vti_address1/ s//$onprem2_gw_vti_address1/" $ipsec_vti_file
+sed -i "/\$hub2_gw_bgp_ip0/ s//$hub2_gw_bgp_ip0/" $ipsec_vti_file
 sed -i "/\$hub2_gw_bgp_ip1/ s//$hub2_gw_bgp_ip1/" $ipsec_vti_file
-sed -i "/\$hub2_gw_bgp_ip2/ s//$hub2_gw_bgp_ip2/" $ipsec_vti_file
 
 
 # frr.conf
@@ -860,24 +860,24 @@ service integrated-vtysh-config
 !
 ip route $advertised_address2 $onprem2_gw_ip
 ip route $onprem2_vnet_address $onprem2_gw_ip
+ip route $hub2_gw_bgp_ip0/32 $onprem2_gw_ip
 ip route $hub2_gw_bgp_ip1/32 $onprem2_gw_ip
-ip route $hub2_gw_bgp_ip2/32 $onprem2_gw_ip
 !
 router bgp $onprem2_gw_asn
  bgp router-id $onprem2_gw_private_ip
  no bgp ebgp-requires-policy
+ neighbor $hub2_gw_bgp_ip0 remote-as $hub2_gw_asn
+ neighbor $hub2_gw_bgp_ip0 description $hub2_gw_name-0
+ neighbor $hub2_gw_bgp_ip0 ebgp-multihop 2
  neighbor $hub2_gw_bgp_ip1 remote-as $hub2_gw_asn
- neighbor $hub2_gw_bgp_ip1 description $hub2_gw_name-0
+ neighbor $hub2_gw_bgp_ip1 description $hub2_gw_name-1
  neighbor $hub2_gw_bgp_ip1 ebgp-multihop 2
- neighbor $hub2_gw_bgp_ip2 remote-as $hub2_gw_asn
- neighbor $hub2_gw_bgp_ip2 description $hub2_gw_name-1
- neighbor $hub2_gw_bgp_ip2 ebgp-multihop 2
  !
  address-family ipv4 unicast
   network $advertised_address2
   network $onprem2_vnet_address
+  neighbor $hub2_gw_bgp_ip0 soft-reconfiguration inbound
   neighbor $hub2_gw_bgp_ip1 soft-reconfiguration inbound
-  neighbor $hub2_gw_bgp_ip2 soft-reconfiguration inbound
  exit-address-family
 exit
 !
@@ -928,21 +928,21 @@ echo -e "\e[1;36mChecking the BGP details on $onprem1_gw_name...\e[0m"
 ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $onprem1_gw_pubip "sudo vtysh -c 'show bgp summary'"
 ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $onprem1_gw_pubip "sudo vtysh -c 'show ip bgp'"
 echo -e "\e[1;36mChecking the received routes on $onprem1_gw_name...\e[0m"
+ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $onprem1_gw_pubip "sudo vtysh -c 'show ip bgp neighbors $hub1_gw_bgp_ip0 received-routes'"
 ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $onprem1_gw_pubip "sudo vtysh -c 'show ip bgp neighbors $hub1_gw_bgp_ip1 received-routes'"
-ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $onprem1_gw_pubip "sudo vtysh -c 'show ip bgp neighbors $hub1_gw_bgp_ip2 received-routes'"
 echo -e "\e[1;36mChecking the advertised routes to $onprem1_gw_name...\e[0m"
+ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $onprem1_gw_pubip "sudo vtysh -c 'show ip bgp neighbors $hub1_gw_bgp_ip0 advertised-routes'"
 ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $onprem1_gw_pubip "sudo vtysh -c 'show ip bgp neighbors $hub1_gw_bgp_ip1 advertised-routes'"
-ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $onprem1_gw_pubip "sudo vtysh -c 'show ip bgp neighbors $hub1_gw_bgp_ip2 advertised-routes'"
 # checking the bgp details on the onprem2 gw
 echo -e "\e[1;36mChecking the BGP details on $onprem2_gw_name...\e[0m"
 ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $onprem2_gw_pubip "sudo vtysh -c 'show bgp summary'"
 ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $onprem2_gw_pubip "sudo vtysh -c 'show ip bgp'"
 echo -e "\e[1;36mChecking the received routes on $onprem2_gw_name...\e[0m"
+ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $onprem2_gw_pubip "sudo vtysh -c 'show ip bgp neighbors $hub1_gw_bgp_ip0 received-routes'"
 ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $onprem2_gw_pubip "sudo vtysh -c 'show ip bgp neighbors $hub1_gw_bgp_ip1 received-routes'"
-ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $onprem2_gw_pubip "sudo vtysh -c 'show ip bgp neighbors $hub1_gw_bgp_ip2 received-routes'"
 echo -e "\e[1;36mChecking the advertised routes to $onprem2_gw_name...\e[0m"
+ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $onprem2_gw_pubip "sudo vtysh -c 'show ip bgp neighbors $hub1_gw_bgp_ip0 advertised-routes'"
 ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $onprem2_gw_pubip "sudo vtysh -c 'show ip bgp neighbors $hub1_gw_bgp_ip1 advertised-routes'"
-ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $onprem2_gw_pubip "sudo vtysh -c 'show ip bgp neighbors $hub1_gw_bgp_ip2 advertised-routes'"
 # show BGP route tables in RS
 # Learned routes by Azure Route Server in hub1
 echo -e "\e[1;36mListing learned routes by $hub1_rs_name Azure Route Server...\e[0m"
