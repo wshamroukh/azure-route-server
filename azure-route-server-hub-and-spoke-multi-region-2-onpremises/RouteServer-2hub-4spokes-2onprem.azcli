@@ -324,10 +324,10 @@ router bgp $hub1_nva_asn
  neighbor $hub2_nva_private_ip description $hub2_nva_name
  neighbor $hub2_nva_private_ip ebgp-multihop 2
  neighbor $hub1_rs_ip1 remote-as $hub1_rs_asn
- neighbor $hub1_rs_ip1 description $hub1_rs_name-1
+ neighbor $hub1_rs_ip1 description $hub1_rs_name-0
  neighbor $hub1_rs_ip1 ebgp-multihop 2
  neighbor $hub1_rs_ip0 remote-as $hub1_rs_asn
- neighbor $hub1_rs_ip0 description $hub1_rs_name-2
+ neighbor $hub1_rs_ip0 description $hub1_rs_name-1
  neighbor $hub1_rs_ip0 ebgp-multihop 2
  !
  address-family ipv4 unicast
@@ -383,10 +383,10 @@ router bgp $hub2_nva_asn
  neighbor $hub1_nva_private_ip description $hub1_nva_name
  neighbor $hub1_nva_private_ip ebgp-multihop 2
  neighbor $hub2_rs_ip1 remote-as $hub2_rs_asn
- neighbor $hub2_rs_ip1 description $hub2_rs_name-1
+ neighbor $hub2_rs_ip1 description $hub2_rs_name-0
  neighbor $hub2_rs_ip1 ebgp-multihop 2
  neighbor $hub2_rs_ip0 remote-as $hub2_rs_asn
- neighbor $hub2_rs_ip0 description $hub2_rs_name-2
+ neighbor $hub2_rs_ip0 description $hub2_rs_name-1
  neighbor $hub2_rs_ip0 ebgp-multihop 2
  !
  address-family ipv4 unicast
