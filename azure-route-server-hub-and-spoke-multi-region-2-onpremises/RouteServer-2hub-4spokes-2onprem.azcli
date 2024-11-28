@@ -186,7 +186,7 @@ az vm create -n $hub2_nva_name -g $rg -l $location2 --image $vm_image --nics $hu
 
 # hub2 nva details
 echo -e "\e[1;36mGetting $hub2_nva_name details...\e[0m"
-hub2_nva_pubip=$(az network public-ip show -g $rg -n $hub2_nva_name--query ipAddress -o tsv) && echo $hub2_nva_name: $hub2_nva_pubip
+hub2_nva_pubip=$(az network public-ip show -g $rg -n $hub2_nva_name --query ipAddress -o tsv) && echo $hub2_nva_name: $hub2_nva_pubip
 hub2_nva_private_ip=$(az network nic show -g $rg -n $hub2_nva_name --query ipConfigurations[].privateIPAddress -o tsv) && echo $hub2_nva_name NIC IP: $hub2_nva_private_ip
 nva2_gw_ip=$(first_ip $hub2_nva_subnet_address) && echo $hub2_nva_name NIC gw IP: $nva2_gw_ip
 
@@ -435,6 +435,10 @@ onprem1_gw_pubip=$(az network public-ip show -g $rg -n $onprem1_gw_name-pubip --
 onprem1_gw_private_ip=$(az network nic show -g $rg -n $onprem1_gw_name-ext-nic --query ipConfigurations[].privateIPAddress -o tsv)  && echo $onprem1_gw_name NIC IP: $onprem1_gw_private_ip
 onprem1_gw_ip=$(first_ip $onprem1_gw_subnet_address) && echo $onprem1_gw_name NIC default gateway IP: $onprem1_gw_ip
 
+# local network gateway for onprem1
+echo -e "\e[1;36mDeploying $onprem1_gw_name local gateway resource...\e[0m"
+az network local-gateway create -g $rg -n $onprem1_gw_name -l $location1 --gateway-ip-address $onprem1_gw_pubip --asn $onprem1_gw_asn --bgp-peering-address $onprem1_gw_private_ip --local-address-prefixes $onprem1_gw_private_ip/32 -o none
+
 # onprem2 gw
 echo -e "\e[1;36mDeploying $onprem2_gw_name VM...\e[0m"
 az network public-ip create -n $onprem2_gw_name -g $rg -l $location2 --allocation-method Static --sku Basic -o none
@@ -444,6 +448,10 @@ az vm create -n $onprem2_gw_name -g $rg -l $location2 --image $vm_image --nics $
 onprem2_gw_pubip=$(az network public-ip show -g $rg -n $onprem2_gw_name --query ipAddress -o tsv) && echo $onprem2_gw_name: $onprem2_gw_pubip
 onprem2_gw_private_ip=$(az network nic show -g $rg -n $onprem2_gw_name --query ipConfigurations[].privateIPAddress -o tsv) && echo $onprem2_gw_name NIC IP: $onprem2_gw_private_ip
 onprem2_gw_ip=$(first_ip $onprem2_gw_subnet_address) && echo $onprem2_gw_name NIC default gateway IP: $onprem2_gw_ip
+
+# local network gateway for onprem2
+echo -e "\e[1;36mDeploying $onprem2_gw_name local gateway resource...\e[0m"
+az network local-gateway create -g $rg -n $onprem2_gw_name -l $location2 --gateway-ip-address $onprem2_gw_pubip --asn $onprem2_gw_asn --bgp-peering-address $onprem2_gw_private_ip --local-address-prefixes $onprem2_gw_private_ip/32 -o none
 
 # hub1 vm
 echo -e "\e[1;36mDeploying $hub1_vm_name VM...\e[0m"
@@ -484,14 +492,6 @@ az vm create -n $onprem1_vm_name -g $rg -l $location1 --image $vm_image --nics "
 echo -e "\e[1;36mDeploying $onprem2_vm_name VM...\e[0m"
 az network nic create -n "$onprem2_vm_name" -l $location2 --vnet-name $onprem2_vnet_name -g $rg --subnet $onprem2_vm_subnet_name -o none
 az vm create -n $onprem2_vm_name -g $rg -l $location2 --image $vm_image --nics "$onprem2_vm_name" --os-disk-name "$onprem2_vm_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --no-wait
-
-# local gateway1
-echo -e "\e[1;36mDeploying $onprem1_gw_name local gateway resource...\e[0m"
-az network local-gateway create -g $rg -n $onprem1_gw_name -l $location1 --gateway-ip-address $onprem1_gw_pubip --asn $onprem1_gw_asn --bgp-peering-address $onprem1_gw_private_ip --local-address-prefixes $onprem1_gw_private_ip/32 -o none
-
-# local gateway2
-echo -e "\e[1;36mDeploying $onprem2_gw_name local gateway resource...\e[0m"
-az network local-gateway create -g $rg -n $onprem2_gw_name -l $location2 --gateway-ip-address $onprem2_gw_pubip --asn $onprem2_gw_asn --bgp-peering-address $onprem2_gw_private_ip --local-address-prefixes $onprem2_gw_private_ip/32 -o none
 
 # onprem1 route table
 echo -e "\e[1;36mDeploying $onprem1_vnet_name Route Table and attaching it to $onprem1_vm_subnet_name subnet...\e[0m"
