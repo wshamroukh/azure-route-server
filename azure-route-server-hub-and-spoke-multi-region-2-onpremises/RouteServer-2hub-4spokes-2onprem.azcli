@@ -1,6 +1,5 @@
 # Two RouteServers in two hub VNets with NVA and two Spoke VNets connected to each hub and two onprem sites with s2s vpn tunnels to each hub
 # variables
-script_start_time=`date +%s`
 rg=azrouteserver
 location1='centralindia'
 location2='centralindia'
@@ -992,11 +991,6 @@ az network nic show-effective-route-table -g $rg -n $spoke22_vnet_name -o table
 # hub2 vm
 echo -e "\e[1;36mListing effective routes on $hub1_vnet_name NIC ...\e[0m"
 az network nic show-effective-route-table -g $rg -n $hub2_vnet_name -o table
-
-script_run_time=$(expr `date +%s` - $script_start_time)
-((minutes=${script_run_time}/60))
-((seconds=${script_run_time}%60))
-echo -e "\e[1;34mTotal script runtime is (minutes:seconds): $minutes:$seconds\e[0m"
 
 ##########
 #Clean up
