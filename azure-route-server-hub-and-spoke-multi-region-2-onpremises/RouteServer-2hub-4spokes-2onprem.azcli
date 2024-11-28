@@ -213,7 +213,7 @@ echo -e "\e[1;36mDeploying $hub1_rs_name Azure Route Server Resource in $hub1_vn
 az network public-ip create -n $hub1_rs_name -g $rg -l $location1 --allocation-method Static --sku Standard -o none
 rs_subnet_id=$(az network vnet subnet show -g $rg -n RouteServerSubnet --vnet-name $hub1_vnet_name --query id -o tsv)
 rstart_time=$(date +%s)
-az network routeserver create -g $rg -n $hub1_rs_name -l $location1 --hosted-subnet $rs_subnet_id --public-ip-address $hub1_rs_name --verbose -o none
+az network routeserver create -g $rg -n $hub1_rs_name -l $location1 --hosted-subnet $rs_subnet_id --public-ip-address $hub1_rs_name -o none
 rfinish_time=$(date +%s)
 rrun_time=$(($rfinish_time - $rstart_time))
 ((rminutes=rrun_time/60))
@@ -239,7 +239,7 @@ echo -e "\e[1;36mDeploying $hub2_rs_name Azure Route Server Resource in $hub2_vn
 az network public-ip create -n $hub2_rs_name -g $rg -l $location2 --allocation-method Static --sku Standard -o none
 rs_subnet_id=$(az network vnet subnet show -g $rg -n RouteServerSubnet --vnet-name $hub2_vnet_name --query id -o tsv)
 rstart_time=$(date +%s)
-az network routeserver create -g $rg -n $hub2_rs_name -l $location2 --hosted-subnet $rs_subnet_id --public-ip-address $hub2_rs_name --verbose -o none
+az network routeserver create -g $rg -n $hub2_rs_name -l $location2 --hosted-subnet $rs_subnet_id --public-ip-address $hub2_rs_name -o none
 rfinish_time=$(date +%s)
 rrun_time=$(($rfinish_time - $rstart_time))
 ((rminutes=rrun_time/60))
