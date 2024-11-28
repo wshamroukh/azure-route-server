@@ -437,7 +437,7 @@ onprem1_gw_ip=$(first_ip $onprem1_gw_subnet_address) && echo $onprem1_gw_name NI
 
 # local network gateway for onprem1
 echo -e "\e[1;36mDeploying $onprem1_gw_name local gateway resource...\e[0m"
-az network local-gateway create -g $rg -n $onprem1_gw_name -l $location1 --gateway-ip-address $onprem1_gw_pubip --asn $onprem1_gw_asn --bgp-peering-address $onprem1_gw_private_ip --local-address-prefixes $onprem1_gw_private_ip/32 -o none
+az network local-gateway create -g $rg -n $onprem1_gw_name -l $location1 --gateway-ip-address $onprem1_gw_pubip --asn $onprem1_gw_asn --bgp-peering-address $onprem1_gw_private_ip --local-address-prefixes $onprem1_gw_private_ip/32 --no-wait -o none
 
 # onprem2 gw
 echo -e "\e[1;36mDeploying $onprem2_gw_name VM...\e[0m"
@@ -451,7 +451,7 @@ onprem2_gw_ip=$(first_ip $onprem2_gw_subnet_address) && echo $onprem2_gw_name NI
 
 # local network gateway for onprem2
 echo -e "\e[1;36mDeploying $onprem2_gw_name local gateway resource...\e[0m"
-az network local-gateway create -g $rg -n $onprem2_gw_name -l $location2 --gateway-ip-address $onprem2_gw_pubip --asn $onprem2_gw_asn --bgp-peering-address $onprem2_gw_private_ip --local-address-prefixes $onprem2_gw_private_ip/32 -o none
+az network local-gateway create -g $rg -n $onprem2_gw_name -l $location2 --gateway-ip-address $onprem2_gw_pubip --asn $onprem2_gw_asn --bgp-peering-address $onprem2_gw_private_ip --local-address-prefixes $onprem2_gw_private_ip/32 --no-wait -o none
 
 # hub1 vm
 echo -e "\e[1;36mDeploying $hub1_vm_name VM...\e[0m"
