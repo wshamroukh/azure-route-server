@@ -212,7 +212,13 @@ az network vnet subnet update -g $rg --vnet-name $hub2_vnet_name -n $hub2_nva_su
 echo -e "\e[1;36mDeploying $hub1_rs_name Azure Route Server Resource in $hub1_vnet_name...\e[0m"
 az network public-ip create -n $hub1_rs_name -g $rg -l $location1 --allocation-method Static --sku Standard -o none
 rs_subnet_id=$(az network vnet subnet show -g $rg -n RouteServerSubnet --vnet-name $hub1_vnet_name --query id -o tsv)
+rstart_time=$(date +%s)
 az network routeserver create -g $rg -n $hub1_rs_name -l $location1 --hosted-subnet $rs_subnet_id --public-ip-address $hub1_rs_name --verbose -o none
+rfinish_time=$(date +%s)
+rrun_time=$(($rfinish_time - $rstart_time))
+((rminutes=rrun_time/60))
+((rseconds=rrun_time%60))
+echo -e "\e[1;33mCreating Azure Route Server took $rminutes minutes and $rseconds seconds\e[0m"
 echo -e "\e[1;36mEnabling Branch-to-Branch setting on $hub1_rs_name Azure Route Server...\e[0m"
 az network routeserver update -n $hub1_rs_name -g $rg --allow-b2b-traffic true -o none
 # Set Routing Preference to VpnGateway
@@ -232,7 +238,12 @@ az network routeserver peering create -g $rg -n $hub1_nva_name-peering --routese
 echo -e "\e[1;36mDeploying $hub2_rs_name Azure Route Server Resource in $hub2_vnet_name...\e[0m"
 az network public-ip create -n $hub2_rs_name -g $rg -l $location2 --allocation-method Static --sku Standard -o none
 rs_subnet_id=$(az network vnet subnet show -g $rg -n RouteServerSubnet --vnet-name $hub2_vnet_name --query id -o tsv)
+rstart_time=$(date +%s)
 az network routeserver create -g $rg -n $hub2_rs_name -l $location2 --hosted-subnet $rs_subnet_id --public-ip-address $hub2_rs_name --verbose -o none
+rfinish_time=$(date +%s)
+rrun_time=$(($rfinish_time - $rstart_time))
+((rminutes=rrun_time/60))
+((rseconds=rrun_time%60))
 echo -e "\e[1;36mEnabling Branch-to-Branch setting on $hub2_rs_name Azure Route Server...\e[0m"
 az network routeserver update -n $hub2_rs_name -g $rg --allow-b2b-traffic true -o none
 # Set Routing Preference to VpnGateway
