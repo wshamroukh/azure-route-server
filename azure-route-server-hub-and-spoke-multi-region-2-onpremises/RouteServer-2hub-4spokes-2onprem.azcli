@@ -226,8 +226,8 @@ echo -e "\e[1;36mSet Routing Preference to VpnGateway on $hub1_rs_name Azure Rou
 az network routeserver update -n $hub1_rs_name -g $rg --hub-routing-preference VpnGateway -o none
 # hub1 route server details
 echo -e "\e[1;36mGetting $hub1_rs_name Route Server details...\e[0m"
-hub1_rs_ip1=$(az network routeserver show -g $rg -n $hub1_rs_name --query virtualRouterIps[0] -o tsv) && echo $hub1_rs_name: $hub1_rs_ip1
-hub1_rs_ip2=$(az network routeserver show -g $rg -n $hub1_rs_name --query virtualRouterIps[1] -o tsv) && echo $hub1_rs_name: $hub1_rs_ip2
+hub1_rs_ip0=$(az network routeserver show -g $rg -n $hub1_rs_name --query virtualRouterIps[0] -o tsv) && echo $hub1_rs_name: $hub1_rs_ip0
+hub1_rs_ip1=$(az network routeserver show -g $rg -n $hub1_rs_name --query virtualRouterIps[1] -o tsv) && echo $hub1_rs_name: $hub1_rs_ip1
 hub1_rs_asn=$(az network routeserver show -g $rg -n $hub1_rs_name --query virtualRouterAsn -o tsv) && echo $hub1_rs_name: $hub1_rs_asn
 
 # Create BGP Peering between hub1 RouteServer and hub1 NVA
@@ -251,8 +251,8 @@ echo -e "\e[1;36mSet Routing Preference to VpnGateway on $hub2_rs_name Azure Rou
 az network routeserver update -n $hub2_rs_name -g $rg --hub-routing-preference VpnGateway -o none
 # hub2 route server details
 echo -e "\e[1;36mGetting $hub2_rs_name Route Server details...\e[0m"
-hub2_rs_ip1=$(az network routeserver show -g $rg -n $hub2_rs_name --query virtualRouterIps[0] -o tsv) && echo $hub2_rs_name: $hub2_rs_ip1
-hub2_rs_ip2=$(az network routeserver show -g $rg -n $hub2_rs_name --query virtualRouterIps[1] -o tsv) && echo $hub2_rs_name: $hub2_rs_ip2
+hub2_rs_ip0=$(az network routeserver show -g $rg -n $hub2_rs_name --query virtualRouterIps[0] -o tsv) && echo $hub2_rs_name: $hub2_rs_ip0
+hub2_rs_ip1=$(az network routeserver show -g $rg -n $hub2_rs_name --query virtualRouterIps[1] -o tsv) && echo $hub2_rs_name: $hub2_rs_ip1
 hub2_rs_asn=$(az network routeserver show -g $rg -n $hub2_rs_name --query virtualRouterAsn -o tsv) && echo $hub2_rs_name: $hub2_rs_asn
 
 # Create BGP Peering between hub2 RouteServer and hub2 NVA
@@ -311,8 +311,8 @@ log syslog informational
 no ipv6 forwarding
 service integrated-vtysh-config
 !
-ip route $hub1_rs_ip2/32 $nva1_gw_ip
 ip route $hub1_rs_ip1/32 $nva1_gw_ip
+ip route $hub1_rs_ip0/32 $nva1_gw_ip
 ip route $hub2_nva_private_ip/32 $nva1_gw_ip
 ip route $network_address_summary $nva1_gw_ip
 ip route $advertised_address3 $nva1_gw_ip
@@ -323,18 +323,18 @@ router bgp $hub1_nva_asn
  neighbor $hub2_nva_private_ip remote-as $hub2_nva_asn
  neighbor $hub2_nva_private_ip description $hub2_nva_name
  neighbor $hub2_nva_private_ip ebgp-multihop 2
- neighbor $hub1_rs_ip2 remote-as $hub1_rs_asn
- neighbor $hub1_rs_ip2 description $hub1_rs_name-1
- neighbor $hub1_rs_ip2 ebgp-multihop 2
  neighbor $hub1_rs_ip1 remote-as $hub1_rs_asn
- neighbor $hub1_rs_ip1 description $hub1_rs_name-2
+ neighbor $hub1_rs_ip1 description $hub1_rs_name-1
  neighbor $hub1_rs_ip1 ebgp-multihop 2
+ neighbor $hub1_rs_ip0 remote-as $hub1_rs_asn
+ neighbor $hub1_rs_ip0 description $hub1_rs_name-2
+ neighbor $hub1_rs_ip0 ebgp-multihop 2
  !
  address-family ipv4 unicast
   network $network_address_summary
   network $advertised_address3
-  neighbor $hub1_rs_ip2 soft-reconfiguration inbound
   neighbor $hub1_rs_ip1 soft-reconfiguration inbound
+  neighbor $hub1_rs_ip0 soft-reconfiguration inbound
   neighbor $hub2_nva_private_ip soft-reconfiguration inbound
   neighbor $hub2_nva_private_ip remove-private-AS
  exit-address-family
@@ -371,8 +371,8 @@ no ipv6 forwarding
 service integrated-vtysh-config
 !
 ip route $hub1_nva_private_ip/32 $nva2_gw_ip
-ip route $hub2_rs_ip2/32 $nva2_gw_ip
 ip route $hub2_rs_ip1/32 $nva2_gw_ip
+ip route $hub2_rs_ip0/32 $nva2_gw_ip
 ip route $network_address_summary $nva2_gw_ip
 ip route $advertised_address4 $nva2_gw_ip
 !
@@ -382,20 +382,20 @@ router bgp $hub2_nva_asn
  neighbor $hub1_nva_private_ip remote-as $hub1_nva_asn
  neighbor $hub1_nva_private_ip description $hub1_nva_name
  neighbor $hub1_nva_private_ip ebgp-multihop 2
- neighbor $hub2_rs_ip2 remote-as $hub2_rs_asn
- neighbor $hub2_rs_ip2 description $hub2_rs_name-1
- neighbor $hub2_rs_ip2 ebgp-multihop 2
  neighbor $hub2_rs_ip1 remote-as $hub2_rs_asn
- neighbor $hub2_rs_ip1 description $hub2_rs_name-2
+ neighbor $hub2_rs_ip1 description $hub2_rs_name-1
  neighbor $hub2_rs_ip1 ebgp-multihop 2
+ neighbor $hub2_rs_ip0 remote-as $hub2_rs_asn
+ neighbor $hub2_rs_ip0 description $hub2_rs_name-2
+ neighbor $hub2_rs_ip0 ebgp-multihop 2
  !
  address-family ipv4 unicast
   network $network_address_summary
   network $advertised_address4
   neighbor $hub1_nva_private_ip soft-reconfiguration inbound
   neighbor $hub1_nva_private_ip remove-private-AS
-  neighbor $hub2_rs_ip2 soft-reconfiguration inbound
   neighbor $hub2_rs_ip1 soft-reconfiguration inbound
+  neighbor $hub2_rs_ip0 soft-reconfiguration inbound
  exit-address-family
 exit
 !
@@ -906,21 +906,21 @@ echo -e "\e[1;36mChecking the BGP details on $hub1_nva_name VM...\e[0m"
 ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub1_nva_pubip "sudo vtysh -c 'show bgp summary'"
 ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub1_nva_pubip "sudo vtysh -c 'show ip bgp'"
 echo -e "\e[1;36mChecking the received routes on $hub1_nva_name VM...\e[0m"
+ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub1_nva_pubip "sudo vtysh -c 'show ip bgp neighbors $hub1_rs_ip0 received-routes'"
 ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub1_nva_pubip "sudo vtysh -c 'show ip bgp neighbors $hub1_rs_ip1 received-routes'"
-ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub1_nva_pubip "sudo vtysh -c 'show ip bgp neighbors $hub1_rs_ip2 received-routes'"
 echo -e "\e[1;36mChecking the advertised routes to $hub1_nva_name VM...\e[0m"
+ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub1_nva_pubip "sudo vtysh -c 'show ip bgp neighbors $hub1_rs_ip0 advertised-routes'"
 ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub1_nva_pubip "sudo vtysh -c 'show ip bgp neighbors $hub1_rs_ip1 advertised-routes'"
-ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub1_nva_pubip "sudo vtysh -c 'show ip bgp neighbors $hub1_rs_ip2 advertised-routes'"
 # checking the bgp details on the hub2 NVA VM
 echo -e "\e[1;36mChecking the BGP details on $hub2_nva_name VM...\e[0m"
 ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub2_nva_pubip "sudo vtysh -c 'show bgp summary'"
 ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub2_nva_pubip "sudo vtysh -c 'show ip bgp'"
 echo -e "\e[1;36mChecking the received routes on $hub2_nva_name VM...\e[0m"
+ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub2_nva_pubip "sudo vtysh -c 'show ip bgp neighbors $hub2_rs_ip0 received-routes'"
 ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub2_nva_pubip "sudo vtysh -c 'show ip bgp neighbors $hub2_rs_ip1 received-routes'"
-ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub2_nva_pubip "sudo vtysh -c 'show ip bgp neighbors $hub2_rs_ip2 received-routes'"
 echo -e "\e[1;36mChecking the advertised routes to $hub2_nva_name VM...\e[0m"
+ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub2_nva_pubip "sudo vtysh -c 'show ip bgp neighbors $hub2_rs_ip0 advertised-routes'"
 ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub2_nva_pubip "sudo vtysh -c 'show ip bgp neighbors $hub2_rs_ip1 advertised-routes'"
-ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $hub2_nva_pubip "sudo vtysh -c 'show ip bgp neighbors $hub2_rs_ip2 advertised-routes'"
 # checking the bgp details on the onprem1 gw
 echo -e "\e[1;36mChecking the BGP details on $onprem1_gw_name...\e[0m"
 ssh -n -o BatchMode=yes -o StrictHostKeyChecking=no $onprem1_gw_pubip "sudo vtysh -c 'show bgp summary'"
