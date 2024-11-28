@@ -168,14 +168,14 @@ az network vnet peering create -n $hub2_vnet_name-to-$hub1_vnet_name -g $rg --vn
 
 # hub1 nva
 echo -e "\e[1;36mDeploying $hub1_nva_name VM...\e[0m"
-az network public-ip create -n "$hub1_nva_name -g $rg -l $location1 --allocation-method Static --sku Basic -o none
-az network nic create -n "$hub1_nva_name -l $location1 --vnet-name $hub1_vnet_name -g $rg --subnet $hub1_nva_subnet_name --ip-forwarding true --public-ip-address "$hub1_nva_name -o none
-az vm create -n $hub1_nva_name -g $rg -l $location1 --image $vm_image --nics "$hub1_nva_name --os-disk-name $hub1_nva_name --size $vm_size --admin-username $admin_username --generate-ssh-keys --custom-data $cloudinit_file --no-wait
+az network public-ip create -n $hub1_nva_name -g $rg -l $location1 --allocation-method Static --sku Basic -o none
+az network nic create -n $hub1_nva_name -l $location1 --vnet-name $hub1_vnet_name -g $rg --subnet $hub1_nva_subnet_name --ip-forwarding true --public-ip-address $hub1_nva_name -o none
+az vm create -n $hub1_nva_name -g $rg -l $location1 --image $vm_image --nics $hub1_nva_name --os-disk-name $hub1_nva_name --size $vm_size --admin-username $admin_username --generate-ssh-keys --custom-data $cloudinit_file --no-wait
 
 # hub1 nva details
 echo -e "\e[1;36mGetting $hub1_nva_name details...\e[0m"
-hub1_nva_pubip=$(az network public-ip show -g $rg -n "$hub1_nva_name --query ipAddress -o tsv) && echo $hub1_nva_name: $hub1_nva_pubip
-hub1_nva_private_ip=$(az network nic show -g $rg -n "$hub1_nva_name --query ipConfigurations[].privateIPAddress -o tsv) && echo $hub1_nva_name external NIC IP: $hub1_nva_private_ip
+hub1_nva_pubip=$(az network public-ip show -g $rg -n $hub1_nva_name --query ipAddress -o tsv) && echo $hub1_nva_name: $hub1_nva_pubip
+hub1_nva_private_ip=$(az network nic show -g $rg -n $hub1_nva_name --query ipConfigurations[].privateIPAddress -o tsv) && echo $hub1_nva_name external NIC IP: $hub1_nva_private_ip
 nva1_gw_ip=$(first_ip $hub1_nva_subnet_address) && echo $hub1_nva_name external NIC gw IP: $nva1_gw_ip
 
 # hub2 nva
