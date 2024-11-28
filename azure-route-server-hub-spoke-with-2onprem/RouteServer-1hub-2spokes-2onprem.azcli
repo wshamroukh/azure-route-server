@@ -136,8 +136,8 @@ az vm create -n $hub_nva_name -g $rg --image $vm_image --nics "$hub_nva_name" --
 # hub nva details
 echo -e "\e[1;36mGetting $hub_nva_name details...\e[0m"
 hub_nva_pubip=$(az network public-ip show -g $rg -n "$hub_nva_name" --query ipAddress -o tsv) && echo $hub_nva_name: $hub_nva_pubip
-hub_nva_private_ip=$(az network nic show -g $rg -n $hub_nva_name --query ipConfigurations[].privateIPAddress -o tsv) && echo $hub_nva_name external NIC IP: $hub_nva_private_ip
-nva_gw_ip=$(first_ip $hub_nva_subnet_address) && echo $hub_nva_name external NIC default gateway IP: $nva_gw_ip
+hub_nva_private_ip=$(az network nic show -g $rg -n $hub_nva_name --query ipConfigurations[].privateIPAddress -o tsv) && echo $hub_nva_name NIC IP: $hub_nva_private_ip
+nva_gw_ip=$(first_ip $hub_nva_subnet_address) && echo $hub_nva_name NIC default gateway IP: $nva_gw_ip
 
 # spoke1 vnet
 echo -e "\e[1;36mCreating $spoke1_vnet_name VNet...\e[0m"
@@ -256,8 +256,8 @@ az vm create -n $onprem1_gw_name -g $rg --image $vm_image --nics "$onprem1_gw_na
 
 # onprem1 gw details:
 onprem1_gw_pubip=$(az network public-ip show -g $rg -n $onprem1_gw_name-pubip --query ipAddress -o tsv) && echo $onprem1_gw_name: $onprem1_gw_pubip
-onprem1_gw_private_ip=$(az network nic show -g $rg -n $onprem1_gw_name --query ipConfigurations[].privateIPAddress -o tsv) && echo $onprem1_gw_name external NIC IP: $onprem1_gw_private_ip
-onprem1_gw_ip=$(first_ip $onprem1_gw_subnet_address) && echo $onprem1_gw_name external NIC default gateway IP: $onprem1_gw_ip
+onprem1_gw_private_ip=$(az network nic show -g $rg -n $onprem1_gw_name --query ipConfigurations[].privateIPAddress -o tsv) && echo $onprem1_gw_name NIC IP: $onprem1_gw_private_ip
+onprem1_gw_ip=$(first_ip $onprem1_gw_subnet_address) && echo $onprem1_gw_name NIC default gateway IP: $onprem1_gw_ip
 
 # local gateway1
 echo -e "\e[1;36mDeploying $onprem1_gw_name local gateway resource...\e[0m"
@@ -271,8 +271,8 @@ az vm create -n $onprem2_gw_name -g $rg --image $vm_image --nics "$onprem2_gw_na
 
 # onprem2 gw details:
 onprem2_gw_pubip=$(az network public-ip show -g $rg -n $onprem2_gw_name-pubip --query ipAddress -o tsv) && echo $onprem2_gw_name: $onprem2_gw_pubip
-onprem2_gw_private_ip=$(az network nic show -g $rg -n $onprem2_gw_name --query ipConfigurations[].privateIPAddress -o tsv) && echo $onprem2_gw_name external NIC IP: $onprem2_gw_private_ip
-onprem2_gw_ip=$(first_ip $onprem2_gw_subnet_address) && echo $onprem2_gw_name external NIC default gateway IP: $onprem2_gw_ip
+onprem2_gw_private_ip=$(az network nic show -g $rg -n $onprem2_gw_name --query ipConfigurations[].privateIPAddress -o tsv) && echo $onprem2_gw_name NIC IP: $onprem2_gw_private_ip
+onprem2_gw_ip=$(first_ip $onprem2_gw_subnet_address) && echo $onprem2_gw_name NIC default gateway IP: $onprem2_gw_ip
 
 # local gateway2
 echo -e "\e[1;36mDeploying $onprem2_gw_name local gateway resource...\e[0m"
