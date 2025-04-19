@@ -85,11 +85,11 @@ function wait_until_finished {
      resource_name=$(echo $resource_id | cut -d/ -f 9)
      echo -e "\e[1;35mWaiting for resource $resource_name to finish provisioning...\e[0m"
      start_time=`date +%s`
-     state=$(az resource show --id $resource_id --query properties.provisioningState -o tsv)
+     state=$(az resource show --id $resource_id --query properties.provisioningState -o tsv | tr -d '\r')
      until [[ "$state" == "Succeeded" ]] || [[ "$state" == "Failed" ]] || [[ -z "$state" ]]
      do
         sleep $wait_interval
-        state=$(az resource show --id $resource_id --query properties.provisioningState -o tsv)
+        state=$(az resource show --id $resource_id --query properties.provisioningState -o tsv | tr -d '\r')
      done
      if [[ -z "$state" ]]
      then
@@ -135,8 +135,8 @@ az vm create -n $hub_nva_name -g $rg --image Ubuntu2404 --nics "$hub_nva_name" -
 
 # hub nva details
 echo -e "\e[1;36mGetting $hub_nva_name details...\e[0m"
-hub_nva_pubip=$(az network public-ip show -g $rg -n "$hub_nva_name" --query ipAddress -o tsv) && echo $hub_nva_name: $hub_nva_pubip
-hub_nva_private_ip=$(az network nic show -g $rg -n $hub_nva_name --query ipConfigurations[].privateIPAddress -o tsv) && echo $hub_nva_name NIC IP: $hub_nva_private_ip
+hub_nva_pubip=$(az network public-ip show -g $rg -n "$hub_nva_name" --query ipAddress -o tsv | tr -d '\r') && echo $hub_nva_name: $hub_nva_pubip
+hub_nva_private_ip=$(az network nic show -g $rg -n $hub_nva_name --query ipConfigurations[].privateIPAddress -o tsv | tr -d '\r') && echo $hub_nva_name NIC IP: $hub_nva_private_ip
 nva_gw_ip=$(first_ip $hub_nva_subnet_address) && echo $hub_nva_name NIC default gateway IP: $nva_gw_ip
 
 # spoke1 vnet
@@ -157,7 +157,7 @@ az network vnet subnet create -g $rg -n $onprem2_gw_subnet_name --address-prefix
 # route server
 echo -e "\e[1;36mDeploying $hub_rs_name Azure Route Server Resource in $hub_vnet_name...\e[0m"
 az network public-ip create -n $hub_rs_name-pubip -g $rg --allocation-method Static --sku Standard -o none
-rs_subnet_id=$(az network vnet subnet show -g $rg -n RouteServerSubnet --vnet-name $hub_vnet_name --query id -o tsv)
+rs_subnet_id=$(az network vnet subnet show -g $rg -n RouteServerSubnet --vnet-name $hub_vnet_name --query id -o tsv | tr -d '\r')
 rstart_time=$(date +%s)
 az network routeserver create -g $rg -n $hub_rs_name --hosted-subnet $rs_subnet_id --public-ip-address $hub_rs_name-pubip -o none
 rfinish_time=$(date +%s)
@@ -175,9 +175,9 @@ az network routeserver update -n $hub_rs_name -g $rg --hub-routing-preference Vp
 
 # route server details
 echo -e "\e[1;36mGetting $hub_rs_name Route Server details...\e[0m"
-rs_ip1=$(az network routeserver show -g $rg -n $hub_rs_name --query virtualRouterIps[0] -o tsv) && echo $hub_rs_name IP1: $rs_ip1
-rs_ip2=$(az network routeserver show -g $rg -n $hub_rs_name --query virtualRouterIps[1] -o tsv) && echo $hub_rs_name IP2: $rs_ip2
-rs_asn=$(az network routeserver show -g $rg -n $hub_rs_name --query virtualRouterAsn -o tsv) && echo $hub_rs_name ASN: $rs_asn
+rs_ip1=$(az network routeserver show -g $rg -n $hub_rs_name --query virtualRouterIps[0] -o tsv | tr -d '\r') && echo $hub_rs_name IP1: $rs_ip1
+rs_ip2=$(az network routeserver show -g $rg -n $hub_rs_name --query virtualRouterIps[1] -o tsv | tr -d '\r') && echo $hub_rs_name IP2: $rs_ip2
+rs_asn=$(az network routeserver show -g $rg -n $hub_rs_name --query virtualRouterAsn -o tsv | tr -d '\r') && echo $hub_rs_name ASN: $rs_asn
 
 # vnet peering
 echo -e "\e[1;36mEstablishing VNet Peering between $hub_vnet_name and $spoke1_vnet_name VNets...\e[0m"
@@ -255,8 +255,8 @@ az network nic create -n "$onprem1_gw_name" --vnet-name $onprem1_vnet_name -g $r
 az vm create -n $onprem1_gw_name -g $rg --image Ubuntu2404 --nics "$onprem1_gw_name" --os-disk-name "$onprem1_gw_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --custom-data $cloudinit_file  --no-wait
 
 # onprem1 gw details:
-onprem1_gw_pubip=$(az network public-ip show -g $rg -n $onprem1_gw_name --query ipAddress -o tsv) && echo $onprem1_gw_name: $onprem1_gw_pubip
-onprem1_gw_private_ip=$(az network nic show -g $rg -n $onprem1_gw_name --query ipConfigurations[].privateIPAddress -o tsv) && echo $onprem1_gw_name NIC IP: $onprem1_gw_private_ip
+onprem1_gw_pubip=$(az network public-ip show -g $rg -n $onprem1_gw_name --query ipAddress -o tsv | tr -d '\r') && echo $onprem1_gw_name: $onprem1_gw_pubip
+onprem1_gw_private_ip=$(az network nic show -g $rg -n $onprem1_gw_name --query ipConfigurations[].privateIPAddress -o tsv | tr -d '\r') && echo $onprem1_gw_name NIC IP: $onprem1_gw_private_ip
 onprem1_gw_ip=$(first_ip $onprem1_gw_subnet_address) && echo $onprem1_gw_name NIC default gateway IP: $onprem1_gw_ip
 
 # local gateway1
@@ -270,8 +270,8 @@ az network nic create -n "$onprem2_gw_name" --vnet-name $onprem2_vnet_name -g $r
 az vm create -n $onprem2_gw_name -g $rg --image Ubuntu2404 --nics "$onprem2_gw_name" --os-disk-name "$onprem2_gw_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --custom-data $cloudinit_file  --no-wait
 
 # onprem2 gw details:
-onprem2_gw_pubip=$(az network public-ip show -g $rg -n $onprem2_gw_name-pubip --query ipAddress -o tsv) && echo $onprem2_gw_name: $onprem2_gw_pubip
-onprem2_gw_private_ip=$(az network nic show -g $rg -n $onprem2_gw_name --query ipConfigurations[].privateIPAddress -o tsv) && echo $onprem2_gw_name NIC IP: $onprem2_gw_private_ip
+onprem2_gw_pubip=$(az network public-ip show -g $rg -n $onprem2_gw_name-pubip --query ipAddress -o tsv | tr -d '\r') && echo $onprem2_gw_name: $onprem2_gw_pubip
+onprem2_gw_private_ip=$(az network nic show -g $rg -n $onprem2_gw_name --query ipConfigurations[].privateIPAddress -o tsv | tr -d '\r') && echo $onprem2_gw_name NIC IP: $onprem2_gw_private_ip
 onprem2_gw_ip=$(first_ip $onprem2_gw_subnet_address) && echo $onprem2_gw_name NIC default gateway IP: $onprem2_gw_ip
 
 # local gateway2
@@ -322,7 +322,7 @@ az network route-table route create --address-prefix $onprem1_vnet_address -n to
 az network vnet subnet update --vnet-name $onprem2_vnet_name -n $onprem2_vm_subnet_name --route-table $onprem2_vnet_name -g $rg -o none
 
 # waiting on vpn gw to finish deployment
-hub_gw_id=$(az network vnet-gateway show -g $rg -n $hub_gw_name --query id -o tsv)
+hub_gw_id=$(az network vnet-gateway show -g $rg -n $hub_gw_name --query id -o tsv | tr -d '\r')
 wait_until_finished $hub_gw_id
 gfinish_time=$(date +%s)
 grun_time=$(($gfinish_time - $gstart_time))
@@ -332,11 +332,11 @@ echo -e "\e[1;33mCreating $hub_gw_name VPN Gateway took $gminutes minutes and $g
 
 # Getting VPN GW details
 echo -e "\e[1;36mGetting $hub_gw_name VPN Gateway details...\e[0m"
-hub_gw_pubip1=$(az network vnet-gateway show -n $hub_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[0].tunnelIpAddresses[0]' -o tsv) && echo $hub_gw_name Public IP1: $hub_gw_pubip1
-hub_gw_pubip2=$(az network vnet-gateway show -n $hub_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[1].tunnelIpAddresses[0]' -o tsv) && echo $hub_gw_name Public IP2: $hub_gw_pubip2
-hub_gw_bgp_ip1=$(az network vnet-gateway show -n $hub_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[0].defaultBgpIpAddresses[0]' -o tsv) && echo $hub_gw_name Bgp IP1: $hub_gw_bgp_ip1
-hub_gw_bgp_ip2=$(az network vnet-gateway show -n $hub_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[1].defaultBgpIpAddresses[0]' -o tsv) && echo $hub_gw_name Bgp IP2: $hub_gw_bgp_ip2
-hub_gw_asn_number=$(az network vnet-gateway show -n $hub_gw_name -g $rg --query bgpSettings.asn -o tsv) && echo $hub_gw_name ASN: $hub_gw_asn_number
+hub_gw_pubip1=$(az network vnet-gateway show -n $hub_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[0].tunnelIpAddresses[0]' -o tsv | tr -d '\r') && echo $hub_gw_name Public IP1: $hub_gw_pubip1
+hub_gw_pubip2=$(az network vnet-gateway show -n $hub_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[1].tunnelIpAddresses[0]' -o tsv | tr -d '\r') && echo $hub_gw_name Public IP2: $hub_gw_pubip2
+hub_gw_bgp_ip1=$(az network vnet-gateway show -n $hub_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[0].defaultBgpIpAddresses[0]' -o tsv | tr -d '\r') && echo $hub_gw_name Bgp IP1: $hub_gw_bgp_ip1
+hub_gw_bgp_ip2=$(az network vnet-gateway show -n $hub_gw_name -g $rg --query 'bgpSettings.bgpPeeringAddresses[1].defaultBgpIpAddresses[0]' -o tsv | tr -d '\r') && echo $hub_gw_name Bgp IP2: $hub_gw_bgp_ip2
+hub_gw_asn_number=$(az network vnet-gateway show -n $hub_gw_name -g $rg --query bgpSettings.asn -o tsv | tr -d '\r') && echo $hub_gw_name ASN: $hub_gw_asn_number
 
 # creating VPN connection between vpn gw and onprem1 gw
 echo -e "\e[1;36mCreating VPN Connection between Azure VPN Gateway $hub_gw_name and Onprem Gateway $onprem1_gw_name...\e[0m"
