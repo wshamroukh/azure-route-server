@@ -55,7 +55,7 @@ onprem2_vnet_name='onprem2'
 admin_username=$(whoami)
 psk='secret123'
 vm_size=Standard_B2ats_v2
-vm_image=$(az vm image list -l $location -p Canonical -s 22_04-lts --all --query "[?offer=='0001-com-ubuntu-server-jammy'].urn" -o tsv | sort -u | tail -n 1) && echo $vm_image
+
 
 advertised_address1='1.1.1.1/32'
 advertised_address2='2.2.2.2/32'
@@ -131,7 +131,7 @@ az network vnet subnet update -g $rg --vnet-name $hub_vnet_name -n $hub_nva_subn
 echo -e "\e[1;36mDeploying $hub_nva_name VM...\e[0m"
 az network public-ip create -n "$hub_nva_name" -g $rg --allocation-method Static --sku Basic -o none
 az network nic create -n "$hub_nva_name" --vnet-name $hub_vnet_name -g $rg --subnet $hub_nva_subnet_name --ip-forwarding true --public-ip-address "$hub_nva_name" -o none
-az vm create -n $hub_nva_name -g $rg --image $vm_image --nics "$hub_nva_name" --os-disk-name "$hub_nva_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --custom-data $cloudinit_file --no-wait
+az vm create -n $hub_nva_name -g $rg --image Ubuntu2404 --nics "$hub_nva_name" --os-disk-name "$hub_nva_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --custom-data $cloudinit_file --no-wait
 
 # hub nva details
 echo -e "\e[1;36mGetting $hub_nva_name details...\e[0m"
@@ -252,7 +252,7 @@ az network vnet-gateway create -g $rg -n $hub_gw_name --public-ip-addresses $hub
 echo -e "\e[1;36mDeploying $onprem1_gw_name VM...\e[0m"
 az network public-ip create -n "$onprem1_gw_name" -g $rg --allocation-method Static --sku Basic -o none
 az network nic create -n "$onprem1_gw_name" --vnet-name $onprem1_vnet_name -g $rg --subnet $onprem1_gw_subnet_name --ip-forwarding true --public-ip-address "$onprem1_gw_name" -o none
-az vm create -n $onprem1_gw_name -g $rg --image $vm_image --nics "$onprem1_gw_name" --os-disk-name "$onprem1_gw_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --custom-data $cloudinit_file  --no-wait
+az vm create -n $onprem1_gw_name -g $rg --image Ubuntu2404 --nics "$onprem1_gw_name" --os-disk-name "$onprem1_gw_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --custom-data $cloudinit_file  --no-wait
 
 # onprem1 gw details:
 onprem1_gw_pubip=$(az network public-ip show -g $rg -n $onprem1_gw_name --query ipAddress -o tsv) && echo $onprem1_gw_name: $onprem1_gw_pubip
@@ -267,7 +267,7 @@ az network local-gateway create -g $rg -n $onprem1_gw_name --gateway-ip-address 
 echo -e "\e[1;36mDeploying $onprem2_gw_name VM...\e[0m"
 az network public-ip create -n "$onprem2_gw_name" -g $rg --allocation-method Static --sku Basic -o none
 az network nic create -n "$onprem2_gw_name" --vnet-name $onprem2_vnet_name -g $rg --subnet $onprem2_gw_subnet_name --ip-forwarding true --public-ip-address "$onprem2_gw_name" -o none
-az vm create -n $onprem2_gw_name -g $rg --image $vm_image --nics "$onprem2_gw_name" --os-disk-name "$onprem2_gw_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --custom-data $cloudinit_file  --no-wait
+az vm create -n $onprem2_gw_name -g $rg --image Ubuntu2404 --nics "$onprem2_gw_name" --os-disk-name "$onprem2_gw_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --custom-data $cloudinit_file  --no-wait
 
 # onprem2 gw details:
 onprem2_gw_pubip=$(az network public-ip show -g $rg -n $onprem2_gw_name-pubip --query ipAddress -o tsv) && echo $onprem2_gw_name: $onprem2_gw_pubip
@@ -281,27 +281,27 @@ az network local-gateway create -g $rg -n $onprem2_gw_name --gateway-ip-address 
 # hub vm
 echo -e "\e[1;36mDeploying $hub_vm_name VM...\e[0m"
 az network nic create -n "$hub_vm_name" --vnet-name $hub_vnet_name -g $rg --subnet $hub_vms_subnet_name -o none
-az vm create -n $hub_vm_name -g $rg --image $vm_image --nics "$hub_vm_name" --os-disk-name "$hub_vm_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --no-wait
+az vm create -n $hub_vm_name -g $rg --image Ubuntu2404 --nics "$hub_vm_name" --os-disk-name "$hub_vm_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --no-wait
 
 # spoke1 vm
 echo -e "\e[1;36mDeploying $spoke1_vm_name VM...\e[0m"
 az network nic create -n "$spoke1_vm_name" --vnet-name $spoke1_vnet_name -g $rg --subnet $spoke1_subnet_name -o none
-az vm create -n $spoke1_vm_name -g $rg --image $vm_image --nics "$spoke1_vm_name" --os-disk-name "$spoke1_vm_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --no-wait
+az vm create -n $spoke1_vm_name -g $rg --image Ubuntu2404 --nics "$spoke1_vm_name" --os-disk-name "$spoke1_vm_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --no-wait
 
 # spoke2 vm
 echo -e "\e[1;36mDeploying $spoke2_vm_name VM...\e[0m"
 az network nic create -n "$spoke2_vm_name" --vnet-name $spoke2_vnet_name -g $rg --subnet $spoke2_subnet_name -o none
-az vm create -n $spoke2_vm_name -g $rg --image $vm_image --nics "$spoke2_vm_name" --os-disk-name "$spoke2_vm_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --no-wait
+az vm create -n $spoke2_vm_name -g $rg --image Ubuntu2404 --nics "$spoke2_vm_name" --os-disk-name "$spoke2_vm_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --no-wait
 
 # onprem1 vm
 echo -e "\e[1;36mDeploying $onprem1_vnet_name VM...\e[0m"
 az network nic create -n "$onprem1_vnet_name" --vnet-name $onprem1_vnet_name -g $rg --subnet $onprem1_vm_subnet_name -o none
-az vm create -n $onprem1_vnet_name -g $rg --image $vm_image --nics "$onprem1_vnet_name" --os-disk-name "$onprem1_vnet_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --no-wait
+az vm create -n $onprem1_vnet_name -g $rg --image Ubuntu2404 --nics "$onprem1_vnet_name" --os-disk-name "$onprem1_vnet_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --no-wait
 
 # onprem2 vm
 echo -e "\e[1;36mDeploying $onprem2_vnet_name VM...\e[0m"
 az network nic create -n "$onprem2_vnet_name" --vnet-name $onprem2_vnet_name -g $rg --subnet $onprem2_vm_subnet_name -o none
-az vm create -n $onprem2_vnet_name -g $rg --image $vm_image --nics "$onprem2_vnet_name" --os-disk-name "$onprem2_vnet_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --no-wait
+az vm create -n $onprem2_vnet_name -g $rg --image Ubuntu2404 --nics "$onprem2_vnet_name" --os-disk-name "$onprem2_vnet_name" --size $vm_size --admin-username $admin_username --generate-ssh-keys --no-wait
 
 # onprem1 route table
 echo -e "\e[1;36mDeploying $onprem1_vnet_name Route Table and attaching it to $onprem1_vm_subnet_name subnet...\e[0m"
