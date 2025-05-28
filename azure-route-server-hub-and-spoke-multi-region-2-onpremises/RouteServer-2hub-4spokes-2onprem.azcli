@@ -626,17 +626,18 @@ IP=$(which ip)
 IPTABLES=$(which iptables)
 PLUTO_MARK_OUT_ARR=(${PLUTO_MARK_OUT//// })
 PLUTO_MARK_IN_ARR=(${PLUTO_MARK_IN//// })
-echo "`date` ${PLUTO_VERB} $VTI_INTERFACE" >> /tmp/vtitrace.log
 case "$PLUTO_CONNECTION" in
   $hub1_gw_name-0)
     VTI_INTERFACE=vti0
     VTI_LOCALADDR=$onprem1_gw_vti_address0/32
     VTI_REMOTEADDR=$hub1_gw_bgp_ip0/32
+    echo "`date` - ${PLUTO_VERB} - ${PLUTO_CONNECTION} - $VTI_INTERFACE" >> /tmp/vtitrace.log
     ;;
   $hub1_gw_name-1)
     VTI_INTERFACE=vti1
     VTI_LOCALADDR=$onprem1_gw_vti_address1/32
     VTI_REMOTEADDR=$hub1_gw_bgp_ip1/32
+    echo "`date` - ${PLUTO_VERB} - ${PLUTO_CONNECTION} - $VTI_INTERFACE" >> /tmp/vtitrace.log
     ;;
 esac
 case "${PLUTO_VERB}" in
@@ -802,17 +803,18 @@ IP=$(which ip)
 IPTABLES=$(which iptables)
 PLUTO_MARK_OUT_ARR=(${PLUTO_MARK_OUT//// })
 PLUTO_MARK_IN_ARR=(${PLUTO_MARK_IN//// })
-echo "`date` ${PLUTO_VERB} $VTI_INTERFACE" >> /tmp/vtitrace.log
 case "$PLUTO_CONNECTION" in
   $hub2_gw_name-0)
     VTI_INTERFACE=vti0
     VTI_LOCALADDR=$onprem2_gw_vti_address0/32
     VTI_REMOTEADDR=$hub2_gw_bgp_ip0/32
+    echo "`date` - ${PLUTO_VERB} - ${PLUTO_CONNECTION} - $VTI_INTERFACE" >> /tmp/vtitrace.log
     ;;
   $hub2_gw_name-1)
     VTI_INTERFACE=vti1
     VTI_LOCALADDR=$onprem2_gw_vti_address1/32
     VTI_REMOTEADDR=$hub2_gw_bgp_ip1/32
+    echo "`date` - ${PLUTO_VERB} - ${PLUTO_CONNECTION} - $VTI_INTERFACE" >> /tmp/vtitrace.log
     ;;
 esac
 case "${PLUTO_VERB}" in
