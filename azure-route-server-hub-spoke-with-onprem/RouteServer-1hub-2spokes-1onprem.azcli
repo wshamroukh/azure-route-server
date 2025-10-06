@@ -225,7 +225,7 @@ rm $frr_conf_file
 echo -e "\e[1;36mDeploying $hub_gw_name VPN Gateway...\e[0m"
 az network public-ip create -g $rg -n $hub_gw_name-0 --allocation-method Static -o none
 az network public-ip create -g $rg -n $hub_gw_name-1 --allocation-method Static -o none
-az network vnet-gateway create -g $rg -n $hub_gw_name --public-ip-addresses $hub_gw_name-0 $hub_gw_name-1 --vnet $hub_vnet_name --asn $hub_gw_asn --sku VpnGw1 --gateway-type Vpn --vpn-type RouteBased --no-wait
+az network vnet-gateway create -g $rg -n $hub_gw_name --public-ip-addresses $hub_gw_name-0 $hub_gw_name-1 --vnet $hub_vnet_name --asn $hub_gw_asn --sku VpnGw2 --gateway-type Vpn --vpn-type RouteBased --no-wait
 
 # onprem g
 echo -e "\e[1;36mDeploying $onprem_gw_name VM...\e[0m"

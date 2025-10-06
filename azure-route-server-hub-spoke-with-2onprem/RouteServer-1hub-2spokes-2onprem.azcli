@@ -245,7 +245,7 @@ echo -e "\e[1;36mDeploying $hub_gw_name VPN Gateway...\e[0m"
 az network public-ip create -g $rg -n $hub_gw_name-pubip1 --allocation-method Static -o none
 az network public-ip create -g $rg -n $hub_gw_name-pubip2 --allocation-method Static -o none
 gstart_time=$(date +%s)
-az network vnet-gateway create -g $rg -n $hub_gw_name --public-ip-addresses $hub_gw_name-pubip1 $hub_gw_name-pubip2 --vnet $hub_vnet_name --asn $hub_gw_asn --sku VpnGw1 --gateway-type Vpn --vpn-type RouteBased --no-wait
+az network vnet-gateway create -g $rg -n $hub_gw_name --public-ip-addresses $hub_gw_name-pubip1 $hub_gw_name-pubip2 --vnet $hub_vnet_name --asn $hub_gw_asn --sku VpnGw2 --gateway-type Vpn --vpn-type RouteBased --no-wait
 
 # onprem1 gw
 echo -e "\e[1;36mDeploying $onprem1_gw_name VM...\e[0m"
