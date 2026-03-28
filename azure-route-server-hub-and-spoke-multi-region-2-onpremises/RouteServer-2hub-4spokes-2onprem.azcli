@@ -296,7 +296,7 @@ echo -e "\e[1;36mCreating BGP and S2S VPN Config files for $hub1_nva_name VM...\
 # frr.donf
 frr_conf_file=~/frr.conf
 cat <<EOF > $frr_conf_file
-frr version 10.2
+frr version 10.6.0
 frr defaults traditional
 hostname $hub1_nva_name
 log syslog informational
@@ -355,7 +355,7 @@ echo -e "\e[1;36mCreating BGP and S2S VPN Config files for $hub2_nva_name VM...\
 # # frr.donf
 frr_conf_file=~/frr.conf
 cat <<EOF > $frr_conf_file
-frr version 10.2
+frr version 10.6.0
 frr defaults traditional
 hostname $hub2_nva_name
 log syslog informational
@@ -674,7 +674,7 @@ sed -i "/\$hub1_gw_bgp_ip1/ s//$hub1_gw_bgp_ip1/" $ipsec_vti_file
 # frr.conf
 frr_conf_file=~/frr.conf
 cat <<EOF > $frr_conf_file
-frr version 8.1
+frr version 10.6.0
 frr defaults traditional
 hostname $onprem1_gw_name
 log syslog informational
@@ -851,7 +851,7 @@ sed -i "/\$hub2_gw_bgp_ip1/ s//$hub2_gw_bgp_ip1/" $ipsec_vti_file
 # frr.conf
 frr_conf_file=~/frr.conf
 cat <<EOF > $frr_conf_file
-frr version 8.1
+frr version 10.6.0
 frr defaults traditional
 hostname $onprem2_gw_name
 log syslog informational
